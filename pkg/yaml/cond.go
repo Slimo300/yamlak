@@ -2,7 +2,6 @@ package yaml
 
 import (
 	"errors"
-	"log"
 	"regexp"
 )
 
@@ -35,8 +34,6 @@ func CheckCondition(doc interface{}, cond *Cond) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	log.Println(cond.Value)
-	log.Println(val)
 	valueAsString, ok := val.(string)
 	if !ok {
 		return false, errors.New("invalid value obtained")

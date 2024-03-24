@@ -17,6 +17,8 @@ import (
 
 const TEMP_FILE = "/tmp/yamlak.yaml"
 
+var forceCreate bool
+
 // setCmd represents the set command
 var setCmd = &cobra.Command{
 	Use:   "set",
@@ -58,8 +60,14 @@ var setCmd = &cobra.Command{
 			}
 
 			if CheckConditions(doc, conditions) {
-				if err := yamlak.SetValueByQuery(doc, nodePath, value); err != nil && !errors.Is(err, yamlak.ErrValueNotFound) {
-					return err
+				if forceCreate {
+					if err := yamlak.CreateValueByQuery(doc, nodePath, value); err != nil {
+						return err
+					}
+				} else {
+					if err := yamlak.SetValueByQuery(doc, nodePath, value); err != nil {
+						return err
+					}
 				}
 			}
 
@@ -92,6 +100,7 @@ func init() {
 		return nil
 	})
 	setCmd.Flags().StringSliceVar(&conditions, "condition", []string{}, "condition for target objects to fulfill")
+	setCmd.Flags().BoolVarP(&forceCreate, "force", "f", false, "use to force creation of node path in file")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

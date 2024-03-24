@@ -21,28 +21,31 @@ func SetValueByQuery(doc interface{}, query, value string) error {
 
 		// if this is last node and it has no indexes then set it to value and return
 		if node_iter == len(nodes)-1 && len(indexes) == 0 {
-			currentAsMap[name] = value
-			return nil
+			if _, ok := currentAsMap[name]; ok {
+				currentAsMap[name] = value
+				return nil
+			}
+			return ErrValueNotFound
 		}
 		// else set as current
 		current = currentAsMap[name]
 
 		for index_iter, index := range indexes {
-			currentAsArray, ok := current.([]interface{})
+			currentAsSlice, ok := current.([]interface{})
 			if !ok {
 				return ErrValueNotFound
 			}
-			if len(currentAsArray) <= index {
+			if len(currentAsSlice) <= index {
 				return ErrValueNotFound
 			}
 
 			// if this is the last node and last index of a node then set it to value and return
 			if node_iter == len(nodes)-1 && index_iter == len(indexes)-1 {
-				currentAsArray[index] = value
+				currentAsSlice[index] = value
 				return nil
 			}
 			// else set as current
-			current = currentAsArray[index]
+			current = currentAsSlice[index]
 		}
 	}
 

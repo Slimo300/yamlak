@@ -124,14 +124,13 @@ spec:
 			if err != nil {
 				t.Errorf("Error decoding input yaml: %v", err)
 			}
-
-			if err := yamlak.SetValueByQuery(test.yaml, test.query, test.value); err != nil {
-				t.Errorf("Error setting value: %v", err)
-			}
-
 			test.result, err = DecodeYAMLFromString(test.result)
 			if err != nil {
 				t.Errorf("Error decoding expected result yaml: %v", err)
+			}
+
+			if err := yamlak.SetValueByQuery(test.yaml, test.query, test.value); err != nil {
+				t.Errorf("Error setting value: %v", err)
 			}
 
 			received, err := StringifyYAML(test.yaml)
