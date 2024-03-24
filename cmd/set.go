@@ -17,7 +17,8 @@ import (
 
 const TEMP_FILE = "/tmp/yamlak.yaml"
 
-var forceCreate bool
+var forceCreateFlag bool
+var inPlaceFlag bool
 
 // setCmd represents the set command
 var setCmd = &cobra.Command{
@@ -42,14 +43,17 @@ var setCmd = &cobra.Command{
 		}
 		defer originalFile.Close()
 
-		tmpFile, err := os.OpenFile(TEMP_FILE, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
-		if err != nil {
-			return err
+		var outputFile *os.File = os.Stdout
+		if inPlaceFlag {
+			outputFile, err = os.OpenFile(TEMP_FILE, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+			if err != nil {
+				return err
+			}
+			defer outputFile.Close()
 		}
-		defer tmpFile.Close()
 
 		dec := yaml.NewDecoder(originalFile)
-		enc := yaml.NewEncoder(tmpFile)
+		enc := yaml.NewEncoder(outputFile)
 
 		for {
 			var doc interface{}
@@ -60,7 +64,7 @@ var setCmd = &cobra.Command{
 			}
 
 			if CheckConditions(doc, conditions) {
-				if forceCreate {
+				if forceCreateFlag {
 					if err := yamlak.CreateValueByQuery(doc, nodePath, value); err != nil {
 						return err
 					}
@@ -79,12 +83,16 @@ var setCmd = &cobra.Command{
 		if err := originalFile.Close(); err != nil {
 			return err
 		}
-		if err := tmpFile.Close(); err != nil {
-			return err
-		}
+		// if we want to make changes to a file and not print the output we have to close file and
+		// move our results to given path
+		if inPlaceFlag {
+			if err := outputFile.Close(); err != nil {
+				return err
+			}
 
-		if err := os.Rename(TEMP_FILE, filePath); err != nil {
-			return err
+			if err := os.Rename(TEMP_FILE, filePath); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -100,14 +108,6 @@ func init() {
 		return nil
 	})
 	setCmd.Flags().StringSliceVar(&conditions, "condition", []string{}, "condition for target objects to fulfill")
-	setCmd.Flags().BoolVarP(&forceCreate, "force", "f", false, "use to force creation of node path in file")
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	setCmd.Flags().BoolVarP(&forceCreateFlag, "force", "f", false, "use to force creation of node path in file")
+	setCmd.Flags().BoolVarP(&inPlaceFlag, "in-place", "i", false, "use to modify given file and not output to stdout")
 }

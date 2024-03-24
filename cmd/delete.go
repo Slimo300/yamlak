@@ -92,5 +92,6 @@ func init() {
 
 		return nil
 	})
+
 	deleteCmd.Flags().StringSliceVar(&conditions, "condition", []string{}, "condition for target objects to fulfill")
 }
