@@ -1,0 +1,34 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      
+      - name: Get current tag of Docker Image
+        id: obtain-new-image
+        run: |
+          current_version=$(skopeo inspect docker://slimo300/yamlak | jq -r '.RepoTags | .[-1]')
+          current_version=${current_version##*:}
+          new_image="slimo300/yamlak:$(echo $current_version | awk -F '.' '{print $1"."$2"."($3 + 1)}')"
+          echo "::set-output name=new-image::$new_image"
+
+      - name: Build Docker Image
+        run: docker build -t ${{ steps.obtain-new-image.outputs.new-image }} .
+      
+      - name: Log In to DockerHub
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Publish an Image
+        run: docker push ${{ steps.obtain-new-image.outputs.new-image }}
+        
