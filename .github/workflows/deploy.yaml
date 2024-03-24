@@ -30,5 +30,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Publish an Image
-        run: docker push ${{ steps.obtain-new-image.outputs.new-image }}
-        
+        run: |
+          docker push ${{ steps.obtain-new-image.outputs.new-image }}
+          docker tag ${{ steps.obtain-new-image.outputs.new-image }} slimo300/yamlak:latest
+          docker push slimo300/yamlak:latest
