@@ -9,7 +9,6 @@ import (
 )
 
 func TestSetValueByQueryWithCreate(t *testing.T) {
-	// Poprawne pliki YAML
 	yaml1 := `
 spec:
   template:
@@ -17,46 +16,11 @@ spec:
       containers:
       - image: nginx
 `
-
 	yaml2 := `
 spec:
   template:
     spec: node
 `
-	// 	yaml3 := `
-	// spec:
-	//   template:
-	//     spec:
-	//       containers:
-	//       - image: nginx
-	//         ports:
-	//         - containerPort: 80
-	// `
-	// 	yaml4 := `
-	// spec:
-	//   template:
-	//     spec:
-	//       containers:
-	//       - - image: nginx
-	//           ports:
-	//           - containerPort: 80
-	// `
-	// 	yaml5 := `
-	// spec:
-	//   template:
-	//     spec:
-	//       containers:
-	//       - - - image: nginx
-	// `
-	// 	yaml6 := `
-	// spec:
-	//   template:
-	//     spec:
-	//       containers:
-	//       - - - image: nginx
-	//             ports:
-	//             - containerPort: 80
-	// `
 
 	tests := []struct {
 		yaml   interface{}
@@ -64,7 +28,6 @@ spec:
 		value  string
 		result interface{}
 	}{
-		// Testy dla plików YAML z pojedynczymi tablicami
 		{yaml1, "spec.template.spec.containers[0].imageData.name", "some_name", `spec:
   template:
     spec:
@@ -92,40 +55,6 @@ spec:
     template:
     - nginx
 `},
-		// 		{yaml3, "spec.template.spec.containers[0].ports[0].containerPort", "8080", `
-		// spec:
-		//   template:
-		//     spec:
-		//       containers:
-		//       - image: nginx
-		//         ports:
-		//         - containerPort: "8080"
-		// `},
-		// 		{yaml4, "spec.template.spec.containers[0][0].ports[0].containerPort", "8080", `
-		// spec:
-		//   template:
-		//     spec:
-		//       containers:
-		//       - - image: nginx
-		//           ports:
-		//           - containerPort: "8080"
-		// `},
-		// 		{yaml5, "spec.template.spec.containers[0][0][0].image", "updated_image", `
-		// spec:
-		//   template:
-		//     spec:
-		//       containers:
-		//       - - - image: updated_image
-		// `},
-		// 		{yaml6, "spec.template.spec.containers[0][0][0].ports[0].containerPort", "8080", `
-		// spec:
-		//   template:
-		//     spec:
-		//       containers:
-		//       - - - image: nginx
-		//             ports:
-		//             - containerPort: "8080"
-		// `},
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("Test %d", i+1), func(t *testing.T) {

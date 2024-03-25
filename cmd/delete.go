@@ -53,7 +53,6 @@ var deleteCmd = &cobra.Command{
 			}
 
 			if CheckConditions(doc, conditions) {
-
 				if err := yamlak.DeleteValueByQuery(doc, nodePath); err != nil && !errors.Is(err, yamlak.ErrValueNotFound) {
 					return err
 				}

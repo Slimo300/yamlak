@@ -65,12 +65,11 @@ spec:
 		t.Errorf("Incorrect error returned, expected 'value not found', received '%s'", err.Error())
 	}
 
-	// Test usuwania elementu tablicy
 	if err := yamlak.DeleteValueByQuery(doc, "spec.volumes[0]"); err != nil {
 		t.Errorf("Error deleting member of a table: %v", err)
 	}
 
-	// Sprawdzenie, czy element tablicy został usunięty poprawnie
+	// Checking whether the element of array was properly erased
 	expectedYAML = `
 apiVersion: v1
 kind: Pod

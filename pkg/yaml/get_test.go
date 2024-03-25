@@ -67,7 +67,6 @@ spec:
 		result interface{}
 		err    error
 	}{
-		// Testy dla plików YAML z pojedynczymi tablicami
 		{yaml1, "spec.template.spec.containers[0].image", "nginx", nil},
 		{yaml2, "spec.template.spec.containers[0][0].image", "nginx", nil},
 		{yaml3, "spec.template.spec.containers[0].ports[0].containerPort", 80, nil},
@@ -75,7 +74,6 @@ spec:
 		{yaml5, "spec.template.spec.containers[0][0][0].image", "nginx", nil},
 		{yaml6, "spec.template.spec.containers[0][0][0].ports[0].containerPort", 80, nil},
 
-		// Test dla nieznalezionej ścieżki
 		{yaml1, "spec.template.spec.containers[1].image", nil, yamlak.ErrValueNotFound},
 	}
 
