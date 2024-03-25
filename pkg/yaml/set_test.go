@@ -12,7 +12,6 @@ import (
 )
 
 func TestSetValueByQuery(t *testing.T) {
-	// Poprawne pliki YAML
 	yaml1 := `
 spec:
   template:

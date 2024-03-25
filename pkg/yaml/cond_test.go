@@ -7,23 +7,6 @@ import (
 	yamlak "github.com/Slimo300/yamlak/pkg/yaml"
 )
 
-// func TestParseCondition(t *testing.T) {
-
-// 	expectedResult := yamlak.Cond{
-// 		Node:     "metadata.name",
-// 		Operator: "!=",
-// 		Value:    "emails",
-// 	}
-
-// 	cond, err := yamlak.ParseCondition("metadata.name!=emails")
-// 	if err != nil {
-// 		t.Errorf("Parsing condition failed: %v", err)
-// 	}
-
-//		if !reflect.DeepEqual(*cond, expectedResult) {
-//			t.Errorf("Expected result: %v doesn't match received: %v", expectedResult, *cond)
-//		}
-//	}
 func TestParseCondition(t *testing.T) {
 	tests := []struct {
 		expr          string
