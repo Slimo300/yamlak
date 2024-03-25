@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -39,14 +40,9 @@ var deleteCmd = &cobra.Command{
 		}
 		defer originalFile.Close()
 
-		tmpFile, err := os.OpenFile(TEMP_FILE, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
-		if err != nil {
-			return err
-		}
-		defer tmpFile.Close()
-
+		buf := &bytes.Buffer{}
 		dec := yaml.NewDecoder(originalFile)
-		enc := yaml.NewEncoder(tmpFile)
+		enc := yaml.NewEncoder(buf)
 
 		for {
 			var doc interface{}
@@ -56,12 +52,11 @@ var deleteCmd = &cobra.Command{
 				return err
 			}
 
-			if !CheckConditions(doc, conditions) {
-				continue
-			}
+			if CheckConditions(doc, conditions) {
 
-			if err := yamlak.DeleteValueByQuery(doc, nodePath); err != nil && !errors.Is(err, yamlak.ErrValueNotFound) {
-				return err
+				if err := yamlak.DeleteValueByQuery(doc, nodePath); err != nil && !errors.Is(err, yamlak.ErrValueNotFound) {
+					return err
+				}
 			}
 
 			if err := enc.Encode(&doc); err != nil {
@@ -69,14 +64,7 @@ var deleteCmd = &cobra.Command{
 			}
 		}
 
-		if err := originalFile.Close(); err != nil {
-			return err
-		}
-		if err := tmpFile.Close(); err != nil {
-			return err
-		}
-
-		if err := os.Rename(TEMP_FILE, filePath); err != nil {
+		if err := outputResult(originalFile, buf, inPlaceFlag); err != nil {
 			return err
 		}
 
@@ -94,4 +82,5 @@ func init() {
 	})
 
 	deleteCmd.Flags().StringSliceVar(&conditions, "condition", []string{}, "condition for target objects to fulfill")
+	deleteCmd.Flags().BoolVarP(&inPlaceFlag, "in-place", "i", false, "use to modify given file and not output to stdout")
 }

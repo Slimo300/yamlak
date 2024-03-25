@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -18,7 +19,6 @@ import (
 const TEMP_FILE = "/tmp/yamlak.yaml"
 
 var forceCreateFlag bool
-var inPlaceFlag bool
 
 // setCmd represents the set command
 var setCmd = &cobra.Command{
@@ -43,17 +43,9 @@ var setCmd = &cobra.Command{
 		}
 		defer originalFile.Close()
 
-		var outputFile *os.File = os.Stdout
-		if inPlaceFlag {
-			outputFile, err = os.OpenFile(TEMP_FILE, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
-			if err != nil {
-				return err
-			}
-			defer outputFile.Close()
-		}
-
+		buf := &bytes.Buffer{}
 		dec := yaml.NewDecoder(originalFile)
-		enc := yaml.NewEncoder(outputFile)
+		enc := yaml.NewEncoder(buf)
 
 		for {
 			var doc interface{}
@@ -80,19 +72,8 @@ var setCmd = &cobra.Command{
 			}
 		}
 
-		if err := originalFile.Close(); err != nil {
+		if err := outputResult(originalFile, buf, inPlaceFlag); err != nil {
 			return err
-		}
-		// if we want to make changes to a file and not print the output we have to close file and
-		// move our results to given path
-		if inPlaceFlag {
-			if err := outputFile.Close(); err != nil {
-				return err
-			}
-
-			if err := os.Rename(TEMP_FILE, filePath); err != nil {
-				return err
-			}
 		}
 
 		return nil
